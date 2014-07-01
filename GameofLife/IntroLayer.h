@@ -26,6 +26,7 @@ typedef struct {
 @property CGSize ScreenSize;
 @property int GridHeight;
 @property int GridWidth;
+
 @property BOOL isDrawing;
 
 

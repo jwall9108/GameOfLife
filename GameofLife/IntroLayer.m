@@ -20,6 +20,7 @@
 GridHeight = _GridHeight, GridWidth = _GridWidth,
 ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 
+bool arr[125*65] = {false};
 // Helper class method that creates a Scene with the HelloWorldLayer as the only child.
 +(CCScene *) scene
 {
@@ -47,7 +48,7 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 		_Batch = [CCSpriteBatchNode batchNodeWithFile:@"HDSquare.png"];
 		_Batch.position = ccp(6, 6);
 		[self buildCellGrid:125 Height:65];
-		[self schedule:@selector(RefreshTimer:) interval:.1];
+		[self schedule:@selector(RefreshTimer:) interval:0];
 	}
 	return self;
 }
@@ -73,8 +74,10 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 -(void) RefreshTimer:(ccTime)delta
 {
 	Block *node;
+	int index = 0;
 	CCARRAY_FOREACH(_Batch.children, node)
 	{
+		
 		int count = 0;
 		for (int x = node.sCoordinate.x - 1; x <= node.sCoordinate.x + 1; x++)
 		{
@@ -84,24 +87,23 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 				{count += [self checkRow:x col:y];}
 			}
 		}
-		[self ConwayLogic:count Node:node];
+		
+		//ConwayLogic
+		if(count < 1 || count >=4){arr[index] = 0;}
+		else if((node.bAlive) && (count == 2 || count == 3)){arr[index]= 1;}
+		else if ((!node.bAlive) && (count == 3)){arr[index]= 1;}
+		else{arr[index]= 0;}
+
+		index++;
 	}
-	[self ToggleBlock];
+	[self ToggleBlocks];
 }
 
--(void)ConwayLogic:(int)count Node:(Block*)node
-{
-	if(count < 1 || count >=4){[_aLife addObject:[NSNumber numberWithInteger:0]];}
-	else if((node.bAlive) && (count == 2 || count == 3)){[_aLife addObject:[NSNumber numberWithInteger:1]];}
-	else if ((!node.bAlive) && (count == 3)){[_aLife addObject:[NSNumber numberWithInteger:1]];}
-	else{[_aLife addObject:[NSNumber numberWithInteger:0]];}
-}
 -(BOOL)checkRow:(int)x col:(int)y
 {
 	if (x >= 0 && x < _GridWidth && y >= 0 && y < _GridHeight)
 	{
-		NSInteger idx = x +  y * _GridWidth;
-		Block *on = [_Batch.children objectAtIndex:idx];
+		Block *on = [_Batch.children objectAtIndex:x +  y * _GridWidth];
 		return on.bAlive;
 	}
 	else{return FALSE;}
@@ -117,7 +119,7 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 		node.AliveColor = SenderColor;
 		node.bAlive = ([self getRandomNumberBetween:0 to:3] == 1);
 	}
-	[self schedule:@selector(RefreshTimer:) interval:.1];
+	[self schedule:@selector(RefreshTimer:) interval:0];
 }
 
 
@@ -127,7 +129,7 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 	_isDrawing = YES;
 	
 	
-	[self schedule:@selector(RefreshTimer:) interval:.1];
+	[self schedule:@selector(RefreshTimer:) interval:0];
 }
 
 -(int)getRandomNumberBetween:(int)from to:(int)to
@@ -150,24 +152,13 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 	ResetButton.position = ccp(45.5, 165);
 	[self addChild: ResetButton];
 	
-	NSMutableArray *arrays = [[NSMutableArray alloc]init];
-	CCMenuItem *Draw1 = [CCMenuItemImage itemWithNormalImage:@"DrawButton.png"
-											  selectedImage:@"DrawButton.png" target:self selector:@selector(drawStart)];
-	Draw1.position = ccp(60,45);
-	[Draw1 setColor:[self GetRandomColor]];
-	[arrays addObject:Draw1];
-	CCMenu *DrawButton = [CCMenu menuWithArray:arrays];
-	DrawButton.position = ccp(45.5, 65);
-	DrawButton.zOrder = 2;
-	[self addChild: DrawButton];
 }
 
--(void)ToggleBlock
+-(void)ToggleBlocks
 {
 	Block *node;
 	CCARRAY_FOREACH(_Batch.descendants, node)
-	{node.bAlive = [[_aLife objectAtIndex:node.sCoordinate.x +  node.sCoordinate.y * _GridWidth] integerValue];}
-	[_aLife removeAllObjects];
+	{node.bAlive = arr[node.sCoordinate.x +  node.sCoordinate.y * _GridWidth];}
 }
 
 -(ccColor3B)GetRandomColor
