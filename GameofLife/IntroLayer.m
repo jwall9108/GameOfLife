@@ -57,9 +57,9 @@ ScreenSize = _ScreenSize, isDrawing = _isDrawing;
 	_GridWidth  = width;
 	_GridHeight = height;
 	coordinate Location;
-	for (Location.y = 0; Location.y <= _GridHeight - 1; Location.y++)
+	for (Location.x = 0; Location.x <= _GridWidth - 1; Location.x++)// rows 
 	{
-		for (Location.x = 0; Location.x <= _GridWidth - 1; Location.x++)
+		for (Location.y = 0; Location.y <= _GridHeight - 1; Location.y++)// columns
 		{
 			Block *blk = [[Block alloc]initWithLocation:Location];
 			blk.position = ccp(Location.x + (Location.x * 3.5), Location.y + (Location.y * 3.5));
